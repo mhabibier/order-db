@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-postgres-headless
+  namespace: order-postgres
+  labels:
+    app.kubernetes.io/name: order-postgres
+    app.kubernetes.io/component: database-headless
+spec:
+  type: ClusterIP
+  clusterIP: None # Headless — DNS akan langsung mengembalikan IP Pod (penting untuk StatefulSet)
+  selector:
+    app: order-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-postgres
+  namespace: order-postgres
+  labels:
+    app.kubernetes.io/name: order-postgres
+    app.kubernetes.io/component: database
+spec:
+  type: ClusterIP
+  selector:
+    app: order-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP
