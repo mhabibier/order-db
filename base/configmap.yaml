@@ -1,6 +1,4 @@
 # order-postgres/configmap.yaml
-# Non-sensitive PostgreSQL configuration for order-service.
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,9 +8,5 @@ metadata:
     app.kubernetes.io/name: order-postgres
     app.kubernetes.io/component: config
 data:
-  # PostgreSQL tuning for a microservice workload
-  # These are passed as POSTGRES_INITDB_ARGS or mounted as config
   PGDATA: "/var/lib/postgresql/data/pgdata"
-
-  # Connection pool hint for pg_hba.conf
   POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"

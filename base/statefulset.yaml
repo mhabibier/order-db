@@ -1,10 +1,4 @@
 # PostgreSQL StatefulSet for order-service.
-#
-# WHY StatefulSet (not Deployment):
-#   - Stable, predictable pod name: order-postgres-0
-#   - Stable network identity via headless service
-#   - volumeClaimTemplates provisions a dedicated PVC per pod
-#   - Ordered startup/shutdown guarantees data consistency
 
 apiVersion: apps/v1
 kind: StatefulSet
@@ -28,15 +22,12 @@ spec:
         app.kubernetes.io/name: order-postgres
         app.kubernetes.io/component: database
     spec:
-      # ── Security ─────────────────────────────────────────────────────────────
-      securityContext:
-        runAsUser: 999
-        runAsGroup: 999
-        fsGroup: 999
-        runAsNonRoot: true
-
-      terminationGracePeriodSeconds: 60
-
+      # securityContext:
+      #   runAsUser: 999
+      #   runAsGroup: 999
+      #   fsGroup: 999
+      #   runAsNonRoot: true
+      # terminationGracePeriodSeconds: 60
       containers:
         - name: postgres
           image: postgres:16-alpine
@@ -45,8 +36,6 @@ spec:
             - name: postgres
               containerPort: 5432
               protocol: TCP
-
-          # ── Credentials from Secret ─────────────────────────────────────────
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -65,8 +54,6 @@ spec:
                   key: POSTGRES_DB
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
-
-          # ── Health probes ───────────────────────────────────────────────────
           livenessProbe:
             exec:
               command:
@@ -93,8 +80,6 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
             successThreshold: 1
-
-          # ── Resources ───────────────────────────────────────────────────────
           resources:
             requests:
               cpu: "100m"
@@ -102,14 +87,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-
-          # ── Volume mount ────────────────────────────────────────────────────
           volumeMounts:
             - name: order-postgres-data
               mountPath: /var/lib/postgresql/data
 
-  # ── PVC Template ─────────────────────────────────────────────────────────────
-  # Nama PVC akan menjadi: order-postgres-data-order-postgres-0
   volumeClaimTemplates:
     - metadata:
         name: order-postgres-data
@@ -122,3 +103,4 @@ spec:
         resources:
           requests:
             storage: 5Gi
+        storageClassName: "ceph-rbd-sc"  # Set to your StorageClass (Longhorn / OpenEBS / NFS)
