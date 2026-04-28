@@ -1,4 +1,5 @@
-# order-postgres/configmap.yaml
+# PostgreSQL configuration for order-service.
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
